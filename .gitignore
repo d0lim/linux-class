@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+*.ko
+*.dwo
+*.cmd
+
+*.symvers
+*.builtin
+*.order
