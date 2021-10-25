@@ -38,3 +38,5 @@
 *.symvers
 *.builtin
 *.order
+
+*.mod.*
