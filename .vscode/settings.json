@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "time.h": "c",
+        "slab.h": "c",
+        "rbtree.h": "c"
+    },
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+}
