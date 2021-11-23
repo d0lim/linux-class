@@ -40,3 +40,5 @@
 *.order
 
 *.mod.*
+assignment/09/process
+assignment/09/pthread
