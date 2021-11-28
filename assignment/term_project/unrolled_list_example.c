@@ -5,10 +5,13 @@
 #include <linux/slab.h>
 #include <linux/random.h>
 
+MODULE_LICENSE("GPL");
+
+
 #define NULL ((void *)0)
 // #define true 1
 // #define false 0
-#define maxElements 4
+#define maxElements 100
 
 typedef __kernel_size_t size_t;
 typedef int elem;
@@ -279,7 +282,7 @@ void printList(ull *list, printElem *printFunction)
     }
 }
 
-bool lookup(elem e, ull *list)
+bool search(elem e, ull *list)
 {
     node *i;
     size_t j;
@@ -323,14 +326,46 @@ void kfree_unrolled(ull *list)
 
 int example(int number_of_nodes)
 {
-    ull *new = new_unrolled(number_of_nodes, &unrolled_equality);
 
+    ull *new = new_unrolled(number_of_nodes, &unrolled_equality);
+    ktime_t start_time, stop_time, elapsed_time;
+
+    /**
+     * Insert
+     */
     int i;
+    elapsed_time = 0;
     for (i = 0; i < number_of_nodes; i++)
     {
+        start_time = ktime_get();
         insert_unrolled(i, new);
+        stop_time = ktime_get();
+        elapsed_time += ktime_sub(stop_time, start_time);
     }
-    printList(new, &printFunction);
+    printk(KERN_INFO "%d INSERT TIME : %lldns\n", number_of_nodes, ktime_to_ns(elapsed_time));
+
+    /**
+     * Search
+     */
+    elapsed_time = 0;
+    for (i = 0; i < number_of_nodes; i++)
+    {
+        start_time = ktime_get();
+        search(i, new);
+        stop_time = ktime_get();
+        elapsed_time += ktime_sub(stop_time, start_time);
+    }
+    printk(KERN_INFO "%d SEARCH TIME : %lldns\n", number_of_nodes, ktime_to_ns(elapsed_time));
+
+    elapsed_time = 0;
+    for (i = 0; i < number_of_nodes; i++)
+    {
+        start_time = ktime_get();
+        delete_unrolled(i, new);
+        stop_time = ktime_get();
+        elapsed_time += ktime_sub(stop_time, start_time);
+    }
+    printk(KERN_INFO "%d DELETE TIME : %lldns\n", number_of_nodes, ktime_to_ns(elapsed_time));
 
     // Free the list
     kfree_unrolled(new);
@@ -339,14 +374,16 @@ int example(int number_of_nodes)
 
 int __init hello_module_init(void)
 {
-    printk(KERN_EMERG "Hello Module\n");
+    printk(KERN_EMERG "Unrolled Linked List Test Start\n");
     example(1000);
+    example(10000);
+    example(100000);
     return 0;
 }
 
 void __exit hello_module_cleanup(void)
 {
-    printk("Bye Module\n");
+    printk("Unrolled LInked List Test Exit\n");
 }
 module_init(hello_module_init);
 module_exit(hello_module_cleanup);

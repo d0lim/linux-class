@@ -8,7 +8,9 @@
         "klist.h": "c",
         "list.h": "c",
         "kernel.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "chrono": "c",
+        "algorithm": "c"
     },
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.formatOnSave": false
