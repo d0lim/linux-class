@@ -2,7 +2,14 @@
     "files.associations": {
         "time.h": "c",
         "slab.h": "c",
-        "rbtree.h": "c"
+        "rbtree.h": "c",
+        "llist.h": "c",
+        "export.h": "c",
+        "klist.h": "c",
+        "list.h": "c",
+        "kernel.h": "c",
+        "types.h": "c"
     },
-    "editor.defaultFormatter": "ms-vscode.cpptools"
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.formatOnSave": false
 }
