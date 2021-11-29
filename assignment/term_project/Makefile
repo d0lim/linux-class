@@ -1,4 +1,4 @@
-obj-m += unrolled_list_example.o
+obj-m += example_hashed_list.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
