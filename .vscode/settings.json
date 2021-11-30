@@ -10,7 +10,20 @@
         "kernel.h": "c",
         "types.h": "c",
         "chrono": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "atomic.h": "c",
+        "atomic64_32.h": "c",
+        "*.tcc": "c",
+        "optional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
     },
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.formatOnSave": false
