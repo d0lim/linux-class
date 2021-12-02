@@ -26,26 +26,44 @@ struct chain
 
 typedef struct chain *Chain;
 
+
 Node create_node(int data);
 void delete_node(Node temp);
 void insert_head(Node head, int data);
 void insert_tail(Node head, int data);
-void delete_tail(Node head);
 void delete_head(Node head);
+void delete_tail(Node head);
+void delete_head_lazy(Node head, Node garbage_head);
+void delete_tail_lazy(Node head, Node garbage_head);
 void display(Node head);
 
 void init_chain_array(void);
+void init_garbage_array(void);
 Chain create_chain(Node new_node);
 void delete_chain(Chain temp);
 void insert_chain_head(int data, Node new_node);
 void insert_chain_tail(int data, Node new_node);
 void delete_chain_head(int data);
 void delete_chain_tail(int data);
+void delete_chain_head_lazy(int data);
+void delete_chain_tail_lazy(int data);
 void display_chain(int count);
 
 Node search_by_data(int data);
 
+void insert_garbage_head(Node garbage_head, Node new_node);
+void insert_garbage_tail(Node garbage_head, Node new_node);
+void delete_garbage_head(Node garbage_head);
+void delete_garbage_tail(Node garbage_head);
+
+void insert_garbage_chain_head(int data, Node new_node);
+void insert_garbage_chain_tail(int data, Node new_node);
+void delete_garbage_chain_head(int data);
+void delete_garbage_chain_tail(int data);
+
 Chain chain_arr[MAX_DATA_CATEGORY];
+Chain garbage_chain_arr[MAX_DATA_CATEGORY];
+
 
 Node create_node(int data)
 {
@@ -58,7 +76,6 @@ Node create_node(int data)
 
 void delete_node(Node temp)
 {
-    // printk("%d deleted\n", temp->data);
     kfree(temp);
     return;
 }
@@ -91,26 +108,11 @@ void insert_tail(Node head, int data)
     insert_chain_tail(data, new_node);
 }
 
-void delete_tail(Node head)
-{
-    if(head->next == head)
-    {
-        // printk("List is empty\n");
-        return;
-    }
-    Node last = head->prev;
-    Node slast = last->prev;
-    delete_chain_tail(last->data);
-    slast->next = head;
-    head->prev = slast;
-    delete_node(last);
-}
 
 void delete_head(Node head)
 {
     if(head->next == head)
     {
-        // printk("List is empty\n");
         return;
     }
     Node first = head->next;
@@ -121,19 +123,63 @@ void delete_head(Node head)
     delete_node(first);
 }
 
-void display(Node head)
+void delete_tail(Node head)
 {
-    Node cur = head->next;
-    if(cur == head)
+    if(head->next == head)
     {
-        // printk("List is empty\n");
         return;
     }
-    // printk("Contents of the Circular Doubly Linked list are\n");
-    while(cur!=head)
+    Node last = head->prev;
+    Node slast = last->prev;
+    delete_chain_tail(last->data);
+    slast->next = head;
+    head->prev = slast;
+    delete_node(last);
+}
+
+
+void delete_head_lazy(Node head, Node garbage_head)
+{
+    if(head->next == head)
     {
-        printk("%d ", cur->data);
-        cur = cur->next;
+        return;
+    }
+    Node first = head->next;
+    Node sfirst = first->next;
+    delete_chain_head(first->data);
+    sfirst->prev = head;
+    head->next = sfirst;
+    
+    insert_garbage_tail(garbage_head, first);
+}
+
+void delete_tail_lazy(Node head, Node garbage_head)
+{
+    if(head->next == head)
+    {
+        return;
+    }
+    Node last = head->prev;
+    Node slast = last->prev;
+    delete_chain_tail(last->data);
+    slast->next = head;
+    head->prev = slast;
+    
+    insert_garbage_tail(garbage_head, last);
+}
+
+void display(Node head)
+{
+    Node curr = head->next;
+    if(curr == head)
+    {
+        return;
+    }
+    printk("Contents of the Circular Doubly Linked list are\n");
+    while(curr!=head)
+    {
+        printk("%d ", curr->data);
+        curr = curr->next;
     }
     printk("\n");
 }
@@ -148,6 +194,16 @@ void init_chain_array(void)
     }
 }
 
+void init_garbage_array(void)
+{
+    int i;
+    for (i = 0; i < MAX_DATA_CATEGORY; i++)
+    {
+        Chain temp = create_chain(NULL);
+        garbage_chain_arr[i] = temp;
+    }
+}
+
 Chain create_chain(Node new_node)
 {
     Chain temp = (Chain) kmalloc(sizeof(struct chain), GFP_KERNEL);
@@ -159,7 +215,6 @@ Chain create_chain(Node new_node)
 
 void delete_chain(Chain temp)
 {
-    // printk("chain of data %d deleted\n", temp->dst->data);
     kfree(temp);
     return;
 }
@@ -188,7 +243,6 @@ void delete_chain_head(int data)
 {
     if (chain_arr[data]->next == chain_arr[data])
     {
-        // printk("List is empty\n");
         return;
     }
     Chain first = chain_arr[data]->next;
@@ -202,7 +256,6 @@ void delete_chain_tail(int data)
 {
     if (chain_arr[data]->next == chain_arr[data])
     {
-        // printk("List is empty\n");
         return;
     }
     Chain last = chain_arr[data]->prev;
@@ -217,19 +270,19 @@ void display_chain(int count)
     int i;
     for (i = 0; i < count; i++)
     {
-        // printk("data %d chain list:\n", i);
-        Chain cur = chain_arr[i]->next;
-        if(cur == chain_arr[i])
+        printk("data %d chain list:\n", i);
+        Chain curr = chain_arr[i]->next;
+        if(curr == chain_arr[i])
         {
-            // printk("Chain list is empty\n");
+            printk("Chain list is empty\n");
             continue ;
         }
-        while(cur != chain_arr[i])
+        while(curr != chain_arr[i])
         {
-            // printk("%d ", cur->dst->data);
-            cur = cur->next;
+            printk("%d ", curr->dst->data);
+            curr = curr->next;
         }
-        // printk("\n");
+        printk("\n");
     }
 }
 
@@ -242,11 +295,109 @@ Node search_by_data(int data)
     return NULL;
 }
 
+void insert_garbage_head(Node garbage_head, Node new_node)
+{
+    Node first = garbage_head->next;
+    garbage_head->next = new_node;
+    new_node->next = first;
+    new_node->prev = garbage_head;
+    first->prev = new_node;
+    
+    insert_garbage_chain_head(new_node->data, new_node);
+}
+
+void insert_garbage_tail(Node garbage_head, Node new_node)
+{
+    Node last = garbage_head->prev;
+    garbage_head->prev = new_node;
+    new_node->prev = last;
+    new_node->next = garbage_head;
+    last->next = new_node;
+    
+    insert_garbage_chain_tail(new_node->data, new_node);
+}
+
+void delete_garbage_head(Node garbage_head)
+{
+    if(garbage_head->next == garbage_head)
+    {
+        return;
+    }
+    Node first = garbage_head->next;
+    Node sfirst = first->next;
+    delete_garbage_chain_head(first->data);
+    sfirst->prev = garbage_head;
+    garbage_head->next = sfirst;
+    delete_node(first);
+}
+
+void delete_garbage_tail(Node garbage_head)
+{
+    if(garbage_head->next == garbage_head)
+    {
+        return;
+    }
+    Node last = garbage_head->prev;
+    Node slast = last->prev;
+    delete_garbage_chain_tail(last->data);
+    slast->next = garbage_head;
+    garbage_head->prev = slast;
+    delete_node(last);
+}
+
+void insert_garbage_chain_head(int data, Node new_node)
+{
+    Chain new_chain = create_chain(new_node);
+    Chain first = garbage_chain_arr[data]->next;
+    garbage_chain_arr[data]->next = new_chain;
+    new_chain->next = first;
+    new_chain->prev = garbage_chain_arr[data];
+    first->prev = new_chain;
+}
+
+void insert_garbage_chain_tail(int data, Node new_node)
+{
+    Chain new_chain = create_chain(new_node);
+    Chain last = garbage_chain_arr[data]->prev;
+    garbage_chain_arr[data]->prev = new_chain;
+    new_chain->prev = last;
+    new_chain->next = garbage_chain_arr[data];
+    last->next = new_chain;
+}
+
+void delete_garbage_chain_head(int data)
+{
+    if (garbage_chain_arr[data]->next == garbage_chain_arr[data])
+    {
+        return;
+    }
+    Chain first = garbage_chain_arr[data]->next;
+    Chain sfirst = first->next;
+    garbage_chain_arr[data]->next = sfirst;
+    sfirst->prev = garbage_chain_arr[data];
+    delete_chain(first);
+}
+
+void delete_garbage_chain_tail(int data)
+{
+    if (garbage_chain_arr[data]->next == garbage_chain_arr[data])
+    {
+        return;
+    }
+    Chain last = garbage_chain_arr[data]->prev;
+    Chain slast = last->prev;
+    garbage_chain_arr[data]->prev = slast;
+    slast->next = garbage_chain_arr[data];
+    delete_chain(last);
+}
+
 void example(int count)
 {
     ktime_t start_time, stop_time, elapsed_time;
     Node head = create_node(0);
+    Node garbage_head = create_node(0);
     init_chain_array();
+    init_garbage_array();
     int i;
 
     /**
@@ -319,7 +470,7 @@ void example(int count)
         struct my_node *tmp;
         int target = i;
         start_time = ktime_get();
-        delete_tail(head);
+        delete_tail_lazy(head, garbage_head);
         stop_time = ktime_get();
         elapsed_time += ktime_sub(stop_time, start_time);
     }
