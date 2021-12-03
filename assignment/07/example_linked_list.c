@@ -100,7 +100,7 @@ void example(int count)
     {
         struct my_node *current_node = NULL;
         struct my_node *tmp;
-        int target = i;
+        int target = num_arr[i];
         start_time = ktime_get();
         list_for_each_entry_safe(current_node, tmp, &my_list, entry)
         {

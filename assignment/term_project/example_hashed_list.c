@@ -242,6 +242,17 @@ Node search_by_data(int data)
     return NULL;
 }
 
+void delete_by_data(int data)
+{
+    Node node = search_by_data(data);
+    Node _prev = node->prev;
+    Node _next = node->next;
+    delete_chain_head(data);
+    _prev->next = _next;
+    _next->prev = _prev;
+    delete_node(node);
+}
+
 void example(int count)
 {
     ktime_t start_time, stop_time, elapsed_time;
@@ -317,9 +328,9 @@ void example(int count)
     {
         struct my_node *cur_node = NULL;
         struct my_node *tmp;
-        int target = i;
+        int target = num_arr[i];
         start_time = ktime_get();
-        delete_tail(head);
+        delete_by_data(target);
         stop_time = ktime_get();
         elapsed_time += ktime_sub(stop_time, start_time);
     }
